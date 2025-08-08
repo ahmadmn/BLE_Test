@@ -111,8 +111,8 @@
 
         .control-button svg {
             display: block;
-            width: 70%;
-            height: 70%;
+            width: 60%;
+            height: 60%;
         }
 
         .start-btn {
@@ -126,10 +126,13 @@
         }
 
         .arrow-btn {
-            width: 80px;
-            height: 80px;
             background-color: #007bff;
             border-color: #007bff;
+
+            svg {
+                width: 100%;
+                height: 100%;
+            }
         }
 
         .graph-area {
@@ -267,7 +270,7 @@
         /* Settings Group Styles */
         .settings-group {
             background-color: #1c2541;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             border: 1px solid #3a506b;
         }
@@ -315,13 +318,13 @@
             display: flex;
             justify-content: space-around;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .settings-group .action-buttons button {
             background-color: #007bff;
             color: white;
-            padding: 10px 15px;
+            padding: 10px 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -608,7 +611,7 @@
                         </div>
                         <div class="settings-group">
                             <div class="action-buttons">
-                                <button id="save-chart-button" class="save-btn">Save Chart Data</button>
+                                <button id="save-chart-button">Save Chart Data</button>
                                 <button id="load-chart-button">Load Chart Data</button>
                                 <button id="print-on-machine">Print On Machine</button>
                             </div>
@@ -616,21 +619,6 @@
                     </div>
 
                     <div id="settings-panel" class="tab-panel">
-                        <div class="settings-group">
-                            <h3>Sample Dimensions</h3>
-                            <div class="setting-item">
-                                <label for="sample-length">Length (mm)</label>
-                                <input type="number" id="sample-length" value="100" step="0.1">
-                            </div>
-                            <div class="setting-item">
-                                <label for="sample-width">Width (mm)</label>
-                                <input type="number" id="sample-width" value="10" step="0.1">
-                            </div>
-                            <div class="setting-item">
-                                <label for="sample-thickness">Thickness (mm)</label>
-                                <input type="number" id="sample-thickness" value="2" step="0.1">
-                            </div>
-                        </div>
 
                         <div class="settings-group">
                             <h3>Test Parameters</h3>
@@ -653,7 +641,7 @@
                             </div>
                             <div class="setting-item">
                                 <label for="chart-stop-percent">Chart Stop Load (%)</label>
-                                <input type="number" id="chart-stop-percent" value="0.0" step="0.1" min="0" max="100">
+                                <input type="number" id="chart-stop-percent" value="90.0" step="0.1" min="0" max="100">
                             </div>
                             <div class="setting-item">
                                 <label for="chart-stop-displacement">Chart Stop Disp. (mm)</label>
@@ -663,6 +651,22 @@
                             <div class="setting-item">
                                 <label for="manual-speed">Manual Speed (mm/min)</label>
                                 <input type="number" id="manual-speed" value="250" step="1" min="1" max="250">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Sample Dimensions</h3>
+                            <div class="setting-item">
+                                <label for="sample-length">Length (mm)</label>
+                                <input type="number" id="sample-length" value="100" step="0.1">
+                            </div>
+                            <div class="setting-item">
+                                <label for="sample-width">Width (mm)</label>
+                                <input type="number" id="sample-width" value="10" step="0.1">
+                            </div>
+                            <div class="setting-item">
+                                <label for="sample-thickness">Thickness (mm)</label>
+                                <input type="number" id="sample-thickness" value="2" step="0.1">
                             </div>
                         </div>
 
@@ -833,7 +837,12 @@
             const reportDbreakValue = document.getElementById('report-dbreak-value');
             const reportStretchValue = document.getElementById('report-stretch-value');
             const reportChartImage = document.getElementById('report-chart-image');
-
+            const DEVICE_CODE = 0xFFFE;
+            const DEVICE_NAME = 'Crush';
+            const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
+            const RX_CHAR_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
+            const TX_CHAR_UUID = "19b10002-e8f2-537e-4f6c-d104768a1214";
+            //----------------------------------------------------------------------------------------------  
             const ctx = document.getElementById('tensile-graph')?.getContext('2d');
             let tensileChart;
             if (ctx) {
@@ -890,28 +899,24 @@
                     }
                 });
             }
-
+            //----------------------------------------------------------------------------------------------  
+            const settingArr = new Uint16Array(32);
             let isTestRunning = false;
-            let timerInterval;
-            let currentTime = 0;
+            let isChartRunning = false;
             let isWebBLEConnected = false;
-            let zeroLoadFlag = true;
-            let zeroEncFlag = true;
+            let zeroLoadFlag = false;
+            let zeroEncFlag = false;
             let loadOffset = 0;
             let encOffset = 0;
             let loadCoef = 1;
             let serialNo = 0;
             let autoReturnFlag = 0;
             let loadDispDig = 0;
-            let lastDisplacement = 0;
-
-
-            const DEVICE_CODE = 0xFFFE;
-            const DEVICE_NAME = 'Crush';
-            const SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
-            const RX_CHAR_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214";
-            const TX_CHAR_UUID = "19b10002-e8f2-537e-4f6c-d104768a1214";
-
+            let chartStartDisplacement = 0;
+            let loadMax = 0;
+            let loadBreak = 0;
+            let displacementMax = 0;
+            let displacementBreak = 0;
             let bleDevice;
             let txCharacteristic;
 
@@ -935,7 +940,6 @@
                 dispFilter: parseFloat(dispFilterInput.value)
             };
 
-
             // Update parameters when inputs change
             sampleLengthInput.addEventListener('change', () => testParameters.sampleLength = parseFloat(sampleLengthInput.value));
             sampleWidthInput.addEventListener('change', () => testParameters.sampleWidth = parseFloat(sampleWidthInput.value));
@@ -954,8 +958,7 @@
             userCoefInput.addEventListener('change', () => calibrationParameters.userCoef = parseFloat(userCoefInput.value * 10000));
             chartFilterInput.addEventListener('change', () => calibrationParameters.chartFilter = parseFloat(chartFilterInput.value));
             dispFilterInput.addEventListener('change', () => calibrationParameters.dispFilter = parseFloat(dispFilterInput.value));
-
-
+            //----------------------------------------------------------------------------------------------  
             function showTab(panelId) {
                 tabButtons.forEach(button => button.classList.remove('active'));
                 document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -964,21 +967,17 @@
                 const targetPanel = document.getElementById(panelId);
                 if (targetPanel) targetPanel.classList.add('active');
             }
-
+            //----------------------------------------------------------------------------------------------  
             tabButtons.forEach(button => {
                 button.addEventListener('click', (event) => {
                     showTab(event.target.dataset.targetPanel);
                 });
             });
             showTab('results-panel');
-
-
-            // --- WebBLE Functions ---
+            //----------------------------------------------------------------------------------------------  
             async function connectToBleDevice() {
                 try {
-
                     console.log('Requesting Bluetooth Device...');
-                    //
                     bleDevice = await navigator.bluetooth.requestDevice({
                         filters: [{ name: DEVICE_NAME }],
                         optionalServices: [SERVICE_UUID]
@@ -1009,12 +1008,28 @@
                     updateConnectButtonUI();
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
+            function initSetting() {
+                autoReturnFlag = settingArr[0];
+                calibrationParameters.lcCapacity = settingArr[1];
+                lcCapacityInput.value = calibrationParameters.lcCapacity;
+                calibrationParameters.lcSensitivity = settingArr[2];
+                lcSensitivityInput.value = (calibrationParameters.lcSensitivity * 0.001).toFixed(3);
+                calibrationParameters.userCoef = settingArr[3];
+                userCoefInput.value = (calibrationParameters.userCoef * 0.0001).toFixed(4);
+                calibrationParameters.chartFilter = settingArr[4];
+                chartFilterInput.value = calibrationParameters.chartFilter;
+                calibrationParameters.dispFilter = settingArr[5];
+                dispFilterInput.value = calibrationParameters.dispFilter;
+                applyLoadCalibration();
+            }
+            //----------------------------------------------------------------------------------------------  
             function handleNotifications(event) {
                 let load = 0;
                 let displacement = 0;
                 let loadSumCntr = 0;
                 let loadSum = 0;
+                let chartDisplacement = 0;
 
                 const value = event.target.value;
                 const dataView = new DataView(value.buffer);
@@ -1023,23 +1038,15 @@
                     if (devCode == DEVICE_CODE) {
                         //speedDisplay.textContent = dataView.byteLength;
                         serialNo = dataView.getUint16(64, true);
-                        autoReturnFlag = dataView.getUint16(0, true);
-                        calibrationParameters.lcCapacity = dataView.getUint16(2, true);
-                        lcCapacityInput.value = calibrationParameters.lcCapacity;
-                        calibrationParameters.lcSensitivity = dataView.getUint16(4, true);
-                        lcSensitivityInput.value = (calibrationParameters.lcSensitivity * 0.001).toFixed(3);
-                        calibrationParameters.userCoef = dataView.getUint16(6, true);
-                        userCoefInput.value = (calibrationParameters.userCoef * 0.0001).toFixed(4);
-                        calibrationParameters.chartFilter = dataView.getUint16(8, true);
-                        chartFilterInput.value = calibrationParameters.chartFilter;
-                        calibrationParameters.dispFilter = dataView.getUint16(10, true);
-                        dispFilterInput.value = calibrationParameters.dispFilter;
-                        applyLoadCalibration();
-
+                        for (let i = 0; i < 32; i++) {
+                            settingArr[i] = dataView.getUint16(i * 2, true);
+                        }
+                        initSetting();
                     }
-                } else {
+                } else if (dataView.byteLength >= 9) {
                     const rawFlags = dataView.getUint16(0, true);
                     const rawSpeed = dataView.getUint16(2, true);
+                    //---------------- Buffer Loop --------------------------
                     for (let i = 4; (i + 8) <= dataView.byteLength; i += 8) {
                         const rawLoad = dataView.getInt32(i, true);
                         const rawEncoder = dataView.getInt32(i + 4, true);
@@ -1058,34 +1065,54 @@
                         loadSum += load;
 
                         if (isTestRunning) {
-                            if (tensileChart) {
-                                tensileChart.data.labels.push(displacement.toFixed(3));
-                                tensileChart.data.datasets[0].data.push(load);
-                            }
-
-                            if (parseFloat(fmaxValue.textContent) < load) {
-                                fmaxValue.textContent = load.toFixed(1);
-                                dmaxValue.textContent = displacement.toFixed(3);
-                            }
-
-                            const autoStopLoadThreshold = (testParameters.chartStopPercent / 100) * calibrationParameters.lcCapacity;
-                            if (displacement >= testParameters.chartStopDisplacement || (autoStopLoadThreshold > 0 && load >= autoStopLoadThreshold)) {
-                                fbreakValue.textContent = load.toFixed(1);
-                                dbreakValue.textContent = displacement.toFixed(3);
-                                if (testParameters.sampleLength > 0) {
-                                    stretchValue.textContent = ((displacement / testParameters.sampleLength) * 100).toFixed(3);
+                            if (isChartRunning) {
+                                chartDisplacement = displacement - chartStartDisplacement;
+                                if (tensileChart) {
+                                    tensileChart.data.labels.push(chartDisplacement.toFixed(3));
+                                    tensileChart.data.datasets[0].data.push(load);
                                 }
-                                stopTest();
+
+                                if (load > loadMax) {
+                                    loadMax = load;
+                                    displacementMax = chartDisplacement;
+                                }
+
+                                let autoStopLoadThreshold = -100.0;
+                                if ((loadMax * 1000) > calibrationParameters.lcCapacity) {
+                                    autoStopLoadThreshold = (testParameters.chartStopPercent * loadMax) - (load * 100);
+                                }
+
+                                if (displacement >= testParameters.chartStopDisplacement || autoStopLoadThreshold > 0.0) {
+                                    stopTest();
+                                }
+                                else {
+                                    loadBreak = load;
+                                    displacementBreak = chartDisplacement;
+                                }
+                            } else {
+                                if (load > testParameters.chartStartLoad) {
+                                    isChartRunning = true;
+                                    chartStartDisplacement = displacement;
+                                    loadMax = 0;
+                                    loadBreak = 0;
+                                    displacementMax = 0;
+                                    displacementBreak = 0;
+                                }
+                                else {
+                                    if (displacement >= testParameters.chartStopDisplacement) {
+                                        stopTest();
+                                    }
+                                }
                             }
                         }
                     }
-
+                    //---------------- End Buffer Loop -----------------------
+                    //---------------- Display summery -----------------------
                     if (loadSumCntr > 0) {
                         load = loadSum / loadSumCntr;
                         loadDisplay.textContent = load.toFixed(loadDispDig);
                         displacementDisplay.textContent = displacement.toFixed(3);
                         speedDisplay.textContent = rawSpeed;
-                        lastDisplacement = displacement;
                         if (isTestRunning && tensileChart) {
                             tensileChart.update('none');
                         }
@@ -1094,16 +1121,17 @@
                 //speedDisplay.textContent = dataView.byteLength;
                 //sendCMD(0x80);
             }
-
+            //----------------------------------------------------------------------------------------------  
             async function sendSpeed(speed) {
                 if (!isWebBLEConnected || !txCharacteristic) {
                     console.error("Not connected or TX Characteristic not available.");
                     return;
                 }
-                const buffer = new ArrayBuffer(3);
+                const buffer = new ArrayBuffer(4);
                 const view = new DataView(buffer);
-                view.setUint8(0, 0x20);
-                view.setInt16(1, speed, true);
+                view.setUint8(0, 0x20); //speed register address
+                view.setInt16(1, speed, true);//speed value
+                view.setUint8(3, 0x81);//beep
 
                 try {
                     await txCharacteristic.writeValueWithoutResponse(buffer);
@@ -1112,7 +1140,24 @@
                     console.error("Failed to send command:", error);
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
+            async function sendSetting(address, value) {
+                if (!isWebBLEConnected || !txCharacteristic) {
+                    console.error("Not connected or TX Characteristic not available.");
+                    return;
+                }
+                const buffer = new ArrayBuffer(3);
+                const view = new DataView(buffer);
+                view.setUint8(0, address); //register address
+                view.setInt16(1, value, true);//speed value
+                try {
+                    await txCharacteristic.writeValueWithoutResponse(buffer);
+                    console.log(`Sent speed command: ${speed}`);
+                } catch (error) {
+                    console.error("Failed to send command:", error);
+                }
+            }
+            //----------------------------------------------------------------------------------------------  
             async function sendCMD(cmd) {
                 if (!isWebBLEConnected || !txCharacteristic) {
                     console.error("Not connected or TX Characteristic not available.");
@@ -1128,7 +1173,7 @@
                     console.error("Failed to send command:", error);
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
             async function sendPrint() {
                 if (!isWebBLEConnected || !txCharacteristic) {
                     console.error("Not connected or TX Characteristic not available.");
@@ -1154,7 +1199,7 @@
                 view[6] = 0x01;
                 // Title Text
                 //const 
-                let myText = "TENSILE TEST REPORT";
+                let myText = "CRUSH TEST REPORT";
                 const padSize = Math.floor((32 - myText.length) / 2);
                 myText = myText.padStart(32 - padSize, " ");
                 myText = myText.padEnd(32, " ");
@@ -1184,24 +1229,34 @@
                     console.error("Failed to send command:", error);
                 }
             }
+            //----------------------------------------------------------------------------------------------  
+            function saveSetting() {
+                if (calibrationParameters.lcCapacity != settingArr[1]) {
+                    sendSetting(1, calibrationParameters.lcCapacity);
+                }
+                if (calibrationParameters.lcSensitivity != settingArr[2]) {
+                    sendSetting(2, calibrationParameters.lcSensitivity);
+                }
 
+                //sendCMD(0xFD);  //save setting
+            }
+            //----------------------------------------------------------------------------------------------  
             function onDisconnected() {
                 console.log('Device disconnected.');
                 isWebBLEConnected = false;
                 txCharacteristic = null;
                 updateConnectButtonUI();
-                stopAppTimer();
+            }
+            //----------------------------------------------------------------------------------------------  
+            function disconnectFromBleDevice() {
                 if (isTestRunning) {
                     stopTest();
                 }
-            }
-
-            function disconnectFromBleDevice() {
                 if (bleDevice && bleDevice.gatt.connected) {
                     bleDevice.gatt.disconnect();
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
             function updateConnectButtonUI() {
                 if (isWebBLEConnected) {
                     connectBleButton.textContent = 'Disconnect from WebBLE';
@@ -1211,22 +1266,7 @@
                     connectBleButton.classList.remove('disconnect');
                 }
             }
-
-            function startAppTimer() {
-                if (timerInterval) clearInterval(timerInterval);
-                currentTime = 0;
-                speedDisplay.textContent = currentTime;
-                timerInterval = setInterval(() => {
-                    currentTime++;
-                    speedDisplay.textContent = currentTime;
-                }, 1000);
-            }
-
-            function stopAppTimer() {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-
+            //----------------------------------------------------------------------------------------------  
             startButton.addEventListener('click', () => {
                 if (!isWebBLEConnected) {
                     alert("Please connect to the BLE device first.");
@@ -1251,28 +1291,33 @@
                 }
 
                 sendSpeed(testParameters.testSpeed);
-                startAppTimer();
             });
-
+            //----------------------------------------------------------------------------------------------  
             function stopTest() {
-                if (!isTestRunning) return;
+
+                if (!isTestRunning) {
+                    sendSpeed(0);
+                    return;
+                }
                 isTestRunning = false;
+                isChartRunning = false;
                 console.log('Test Stopped');
-                sendSpeed(0);
-                stopAppTimer();
 
-                const finalLoad = parseFloat(loadDisplay.textContent);
-                const finalDisplacement = parseFloat(displacementDisplay.textContent);
+                if (autoReturnFlag) {
+                    sendSpeed(-32768);
+                } else {
+                    sendSpeed(0);
+                }
 
-                if (parseFloat(fbreakValue.textContent) === 0.0 && finalLoad > 0) {
-                    fbreakValue.textContent = finalLoad.toFixed(1);
-                    dbreakValue.textContent = finalDisplacement.toFixed(3);
-                    if (testParameters.sampleLength > 0) {
-                        stretchValue.textContent = ((finalDisplacement / testParameters.sampleLength) * 100).toFixed(3);
-                    }
+                fmaxValue.textContent = loadMax.toFixed(loadDispDig);
+                dmaxValue.textContent = displacementMax.toFixed(3);
+                fbreakValue.textContent = loadBreak.toFixed(loadDispDig);
+                dbreakValue.textContent = displacementBreak.toFixed(3);
+                if (testParameters.sampleLength > 0) {
+                    stretchValue.textContent = ((displacementBreak / testParameters.sampleLength) * 100).toFixed(3);
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
             function applyLoadCalibration() {
                 if (calibrationParameters.lcSensitivity === 0) return;
                 loadCoef = (calibrationParameters.userCoef * calibrationParameters.lcCapacity * 0.00001461304728) / (calibrationParameters.lcSensitivity);
@@ -1288,10 +1333,13 @@
                     loadDispDig = 3;
                 }
             }
-
+            //----------------------------------------------------------------------------------------------  
             stopButton.addEventListener('click', stopTest);
-            applyLoadCalbButton.addEventListener('click', applyLoadCalibration);
-            //----------------------------------------------
+            applyLoadCalbButton.addEventListener('click', () => {
+                applyLoadCalibration();
+                saveSetting();
+            });
+            //----------------------------------------------------------------------------------------------  
             downButton.addEventListener('mousedown', () => {
                 if (isTestRunning || !isWebBLEConnected) return;
                 sendSpeed(-testParameters.manualSpeed);
@@ -1311,7 +1359,7 @@
                 if (!isWebBLEConnected) return;
                 sendSpeed(0);
             });
-            //----------------------------------------------
+            //----------------------------------------------------------------------------------------------  
             downButton.addEventListener('touchstart', () => {
                 if (isTestRunning || !isWebBLEConnected) return;
                 sendSpeed(-testParameters.manualSpeed);
@@ -1331,7 +1379,7 @@
                 if (!isWebBLEConnected) return;
                 sendSpeed(0);
             });
-            //----------------------------------------------        
+            //----------------------------------------------------------------------------------------------        
             reportButton.addEventListener('click', () => {
                 reportDateTime.textContent = new Date().toLocaleString();
                 reportSampleLength.textContent = `${testParameters.sampleLength} mm`;
@@ -1368,9 +1416,7 @@
                 };
                 window.addEventListener('afterprint', afterPrint);
             });
-
-
-
+            //----------------------------------------------------------------------------------------------
             saveChartButton.addEventListener('click', () => {
                 if (tensileChart && tensileChart.data.labels.length > 0) {
                     const chartDataToSave = {
@@ -1383,7 +1429,7 @@
                     alert('No chart data to save.');
                 }
             });
-
+            //----------------------------------------------------------------------------------------------
             loadChartButton.addEventListener('click', () => {
                 const savedData = localStorage.getItem('savedCrushChartData');
                 if (savedData) {
@@ -1398,7 +1444,7 @@
                     alert('No saved chart data found.');
                 }
             });
-
+            //----------------------------------------------------------------------------------------------
             printOnMachine.addEventListener('click', () => {
                 if (tensileChart && tensileChart.data.labels.length > 0) {
                     sendPrint();
@@ -1407,7 +1453,7 @@
                     alert('No data to print.');
                 }
             });
-
+            //----------------------------------------------------------------------------------------------
             connectBleButton.addEventListener('click', async () => {
                 if (isWebBLEConnected) {
                     disconnectFromBleDevice();
@@ -1415,7 +1461,7 @@
                     await connectToBleDevice();
                 }
             });
-
+            //----------------------------------------------------------------------------------------------
             updateConnectButtonUI();
         });
     </script>
