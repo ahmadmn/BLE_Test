@@ -14,7 +14,7 @@
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             padding: 10px;
             box-sizing: border-box;
@@ -26,10 +26,11 @@
             border-radius: 10px;
             padding: 15px;
             width: 100%;
-            max-width: 1200px;
+            max-width: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            min-height: auto;
         }
 
         .top-panel {
@@ -39,6 +40,9 @@
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #3a506b;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .display-box {
@@ -47,11 +51,12 @@
             border-radius: 6px;
             text-align: center;
             border: 1px solid #3a506b;
-            min-width: 120px;
+            flex: 1;
+            min-width: 150px;
         }
 
         .display-box label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #adb5bd;
             display: block;
             margin-bottom: 5px;
@@ -70,19 +75,23 @@
 
         .main-content {
             display: flex;
+            flex-direction: row;
             gap: 10px;
             flex-grow: 1;
+            min-height: 0;
         }
 
         .left-controls {
             flex: 3;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0px;
             background-color: #1c2541;
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #3a506b;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .control-buttons-major {
@@ -90,6 +99,8 @@
             justify-content: space-between;
             gap: 10px;
             margin-bottom: 10px;
+            flex-shrink: 0;
+
         }
 
         .control-button {
@@ -109,6 +120,10 @@
             transform: scale(0.95);
         }
 
+        .control-button:hover {
+            background-color: #0056b3;
+        }
+
         .control-button svg {
             display: block;
             width: 60%;
@@ -118,6 +133,7 @@
         .start-btn {
             background-color: #2a9d8f;
             border-color: #2a9d8f;
+            /*margin-right: 10%;*/
         }
 
         .stop-btn {
@@ -135,31 +151,34 @@
             }
         }
 
+
         .graph-area {
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
             background-color: #000;
             border: 1px solid #3a506b;
             border-radius: 5px;
             padding: 10px;
-            display: flex;
-            flex-direction: column;
-            min-height: 200px;
-            max-height: 100%;
-            height: auto;
+            min-width: 0;
+            min-height: 0;
+            max-height: auto;
+            overflow: hidden;
         }
+
 
         .graph-header {
             color: #ccc;
             font-size: 0.9em;
             text-align: center;
             margin-bottom: 5px;
+            flex-shrink: 0;
         }
 
         #tensile-graph {
-            flex-grow: 1;
             width: 100%;
-            height: auto;
-            max-height: 100%;
+            height: 100%;
+            flex-grow: 1;
         }
 
         .right-panel {
@@ -171,11 +190,13 @@
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #3a506b;
+            min-height: 0;
         }
 
         .connect-ble-container {
             margin-bottom: 10px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .connect-ble-button {
@@ -203,7 +224,6 @@
             background-color: #c82333;
         }
 
-
         /* Tab Navigation */
         .tab-navigation {
             display: flex;
@@ -213,6 +233,7 @@
             border-radius: 5px;
             overflow: hidden;
             border: 1px solid #3a506b;
+            flex-shrink: 0;
         }
 
         .tab-button {
@@ -236,17 +257,14 @@
             font-weight: bold;
         }
 
-        /* Fixed height for tab content container */
+        /* Tab content container */
         .tab-content-container {
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            height: 450px;
-            /* Adjusted to fit the content better */
-            min-height: 450px;
-            /* Ensure minimum height */
+            flex-grow: 1;
+            min-height: 0;
             border: 1px solid #3a506b;
-            /* Add border for better visual separation */
             border-radius: 5px;
             background-color: #0b132b;
         }
@@ -256,9 +274,7 @@
             padding: 15px;
             flex-grow: 1;
             overflow-y: auto;
-            /* Enable scrolling for content within the panel */
             max-height: 100%;
-            /* Ensure panels don't overflow their container */
         }
 
         .tab-panel.active {
@@ -337,17 +353,9 @@
             background-color: #0056b3;
         }
 
-        .settings-group .action-buttons button.save-btn {
-            background-color: #28a745;
-        }
-
-        .settings-group .action-buttons button.save-btn:hover {
-            background-color: #218838;
-        }
-
-
         .report-button-container {
             margin: 1px 10px;
+            flex-shrink: 0;
         }
 
         .report-btn {
@@ -374,6 +382,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
         }
 
         .result-item {
@@ -383,6 +393,7 @@
             background-color: #1c2541;
             padding: 8px;
             border-radius: 4px;
+            flex-shrink: 0;
         }
 
         .result-item label {
@@ -512,7 +523,84 @@
                 border: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
+            }
+        }
+
+        /* --- Mobile-first responsive design for screens up to 768px --- */
+        @media (max-width: 768px) {
+            body {
+                align-items: flex-start;
+                padding: 5px;
+            }
+
+            .container {
+                padding: 5px;
+            }
+
+            .display-box {
+                min-width: auto;
+                width: 100%;
+                padding: 5px 10px;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .left-controls,
+            .right-panel {
+                padding: 10px;
+                min-height: 0;
+            }
+
+            /* Ensure tab content is scrollable and not a fixed height */
+            .tab-content-container {
+                height: auto;
+                min-height: auto;
+            }
+
+            .tab-panel {
+                padding: 10px;
+            }
+
+            .tab-navigation {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .tab-button {
+                font-size: 0.8em;
+                padding: 8px 5px;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .setting-item label {
+                flex-basis: auto;
+                margin-bottom: 5px;
+            }
+
+            .settings-group h3 {
+                font-size: 1.1em;
+            }
+
+            .results-display {
+                gap: 5px;
+            }
+
+            .result-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px;
+            }
+
+            .report-btn {
+                font-size: 1em;
+                padding: 8px;
             }
         }
     </style>
@@ -561,13 +649,15 @@
                 </div>
                 <div class="graph-area">
                     <div class="graph-header">Load (N) / Displacement (mm)</div>
-                    <canvas id="tensile-graph"></canvas>
+                    <div>
+                        <canvas id="tensile-graph"></canvas>
+                    </div>
                 </div>
             </div>
 
             <div class="right-panel">
                 <div class="connect-ble-container">
-                    <button id="connect-ble-btn" class="connect-ble-button">Connect to WebBLE</button>
+                    <button id="connect-ble-btn" class="connect-ble-button">Connect</button>
                 </div>
 
                 <div class="tab-navigation">
@@ -611,49 +701,14 @@
                         </div>
                         <div class="settings-group">
                             <div class="action-buttons">
-                                <button id="save-chart-button">Save Chart Data</button>
-                                <button id="load-chart-button">Load Chart Data</button>
+                                <button id="save-chart-button">Save Chart</button>
+                                <button id="load-chart-button">Load Chart</button>
                                 <button id="print-on-machine">Print On Machine</button>
                             </div>
                         </div>
                     </div>
 
                     <div id="settings-panel" class="tab-panel">
-
-                        <div class="settings-group">
-                            <h3>Test Parameters</h3>
-                            <div class="setting-item">
-                                <label for="test-type">Test Type</label>
-                                <select id="test-type">
-                                    <option value="Crush">Crush</option>
-                                    <option value="Compression">Compression</option>
-                                    <option value="Flexural">Flexural</option>
-                                    <option value="Peel">Peel</option>
-                                </select>
-                            </div>
-                            <div class="setting-item">
-                                <label for="test-speed">Test Speed (mm/min)</label>
-                                <input type="number" id="test-speed" value="25" step="1" min="1" max="250">
-                            </div>
-                            <div class="setting-item">
-                                <label for="chart-start-load">Chart Start Load (N)</label>
-                                <input type="number" id="chart-start-load" value="0.5" step="0.1" min="0" max="100">
-                            </div>
-                            <div class="setting-item">
-                                <label for="chart-stop-percent">Chart Stop Load (%)</label>
-                                <input type="number" id="chart-stop-percent" value="90.0" step="0.1" min="0" max="100">
-                            </div>
-                            <div class="setting-item">
-                                <label for="chart-stop-displacement">Chart Stop Disp. (mm)</label>
-                                <input type="number" id="chart-stop-displacement" value="200" step="0.1" min="0"
-                                    max="1000">
-                            </div>
-                            <div class="setting-item">
-                                <label for="manual-speed">Manual Speed (mm/min)</label>
-                                <input type="number" id="manual-speed" value="250" step="1" min="1" max="250">
-                            </div>
-                        </div>
-
                         <div class="settings-group">
                             <h3>Sample Dimensions</h3>
                             <div class="setting-item">
@@ -670,6 +725,43 @@
                             </div>
                         </div>
 
+                        <div class="settings-group">
+                            <h3>Test Parameters</h3>
+                            <div class="setting-item">
+                                <label for="test-type">Test Type</label>
+                                <select id="test-type">
+                                    <option value="0">RCT</option>
+                                    <option value="1">ECT</option>
+                                    <option value="2">FCT A</option>
+                                    <option value="3">FCT B</option>
+                                    <option value="4">PAT</option>
+                                    <option value="5">TCT</option>
+                                    <option value="6">CCT</option>
+                                    <option value="7">CMT</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="test-speed">Test Speed (mm/min)</label>
+                                <input type="number" id="test-speed" value="25" step="1" min="1" max="250">
+                            </div>
+                            <div class="setting-item">
+                                <label for="chart-start-load">Chart Start Load (N)</label>
+                                <input type="number" id="chart-start-load" value="0.5" step="0.1" min="0" max="100">
+                            </div>
+                            <div class="setting-item">
+                                <label for="chart-stop-percent">Chart Stop Load (%)</label>
+                                <input type="number" id="chart-stop-percent" value="0.0" step="0.1" min="0" max="100">
+                            </div>
+                            <div class="setting-item">
+                                <label for="chart-stop-displacement">Chart Stop Disp. (mm)</label>
+                                <input type="number" id="chart-stop-displacement" value="200" step="0.1" min="0"
+                                    max="1000">
+                            </div>
+                            <div class="setting-item">
+                                <label for="manual-speed">Manual Speed (mm/min)</label>
+                                <input type="number" id="manual-speed" value="250" step="1" min="1" max="250">
+                            </div>
+                        </div>
                     </div>
 
                     <div id="calibration-panel" class="tab-panel">
@@ -695,8 +787,14 @@
                                 <label for="disp-filter">Disp Filter</label>
                                 <input type="number" id="disp-filter" value="3" step="1">
                             </div>
+                            <div class="setting-item">
+                                <label for="auto-return-checkbox">Auto Return</label>
+                                <input type="checkbox" id="auto-return-checkbox">
+                            </div>
+
                             <div class="action-buttons">
-                                <button id="apply-load-calb-button" class="save-btn">Apply Calibration</button>
+                                <button id="apply-load-calb-button">Apply</button>
+                                <button id="save-load-calb-button">Save</button>
                             </div>
                         </div>
                     </div>
@@ -802,6 +900,7 @@
             const chartStartInput = document.getElementById('chart-start-load');
             const chartStopPercentInput = document.getElementById('chart-stop-percent');
             const chartStopDisplacementInput = document.getElementById('chart-stop-displacement');
+            const manualSpeedInput = document.getElementById('manual-speed');
 
 
             // --- Calibration inputs ---
@@ -810,10 +909,12 @@
             const userCoefInput = document.getElementById('user-coef');
             const chartFilterInput = document.getElementById('chart-filter');
             const dispFilterInput = document.getElementById('disp-filter');
-            const manualSpeedInput = document.getElementById('manual-speed');
+            const autoReturnInput = document.getElementById('auto-return-checkbox');
+
 
             // --- Calibration Buttons ---
             const applyLoadCalbButton = document.getElementById('apply-load-calb-button');
+            const saveLoadCalbButton = document.getElementById('save-load-calb-button');
 
             // --- Chart Data Management Buttons ---
             const saveChartButton = document.getElementById('save-chart-button');
@@ -854,11 +955,14 @@
                             label: 'Load (N)',
                             data: [],
                             borderColor: 'rgb(75, 192, 192)',
+                            borderWidth: 2,
                             tension: 0.1,
                             pointRadius: 0
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         animation: false,
                         scales: {
                             x: {
@@ -910,7 +1014,6 @@
             let encOffset = 0;
             let loadCoef = 1;
             let serialNo = 0;
-            let autoReturnFlag = 0;
             let loadDispDig = 0;
             let chartStartDisplacement = 0;
             let loadMax = 0;
@@ -925,39 +1028,41 @@
                 sampleWidth: parseFloat(sampleWidthInput.value),
                 sampleThickness: parseFloat(sampleThicknessInput.value),
                 testType: testTypeSelect.value,
-                testSpeed: parseFloat(testSpeedInput.value),
+                testSpeed: parseInt(testSpeedInput.value),
                 chartStartLoad: parseFloat(chartStartInput.value),
                 chartStopPercent: parseFloat(chartStopPercentInput.value),
                 chartStopDisplacement: parseFloat(chartStopDisplacementInput.value),
-                manualSpeed: parseFloat(manualSpeedInput.value)
+                manualSpeed: parseInt(manualSpeedInput.value)
             };
 
             let calibrationParameters = {
-                lcCapacity: parseFloat(lcCapacityInput.value),
-                lcSensitivity: parseFloat(lcSensitivityInput.value * 1000),
-                userCoef: parseFloat(userCoefInput.value * 10000),
-                chartFilter: parseFloat(chartFilterInput.value),
-                dispFilter: parseFloat(dispFilterInput.value)
+                autoReturnFlag: autoReturnInput.checked ? 1 : 0,
+                lcCapacity: parseInt(lcCapacityInput.value),
+                lcSensitivity: parseFloat(lcSensitivityInput.value) * 1000,
+                userCoef: parseFloat(userCoefInput.value) * 10000,
+                chartFilter: parseInt(chartFilterInput.value),
+                dispFilter: parseInt(dispFilterInput.value)
             };
 
             // Update parameters when inputs change
             sampleLengthInput.addEventListener('change', () => testParameters.sampleLength = parseFloat(sampleLengthInput.value));
             sampleWidthInput.addEventListener('change', () => testParameters.sampleWidth = parseFloat(sampleWidthInput.value));
             sampleThicknessInput.addEventListener('change', () => testParameters.sampleThickness = parseFloat(sampleThicknessInput.value));
-            testSpeedInput.addEventListener('change', () => testParameters.testSpeed = parseFloat(testSpeedInput.value));
+            testSpeedInput.addEventListener('change', () => testParameters.testSpeed = parseInt(testSpeedInput.value));
             testTypeSelect.addEventListener('change', () => testParameters.testType = testTypeSelect.value);
             chartStartInput.addEventListener('change', () => testParameters.chartStartLoad = parseFloat(chartStartInput.value));
             chartStopPercentInput.addEventListener('change', () => testParameters.chartStopPercent = parseFloat(chartStopPercentInput.value));
             chartStopDisplacementInput.addEventListener('change', () => testParameters.chartStopDisplacement = parseFloat(chartStopDisplacementInput.value));
-            manualSpeedInput.addEventListener('change', () => testParameters.manualSpeed = parseFloat(manualSpeedInput.value));
+            manualSpeedInput.addEventListener('change', () => testParameters.manualSpeed = parseInt(manualSpeedInput.value));
 
 
             // Update calibration parameters when inputs change
-            lcCapacityInput.addEventListener('change', () => calibrationParameters.lcCapacity = parseFloat(lcCapacityInput.value));
-            lcSensitivityInput.addEventListener('change', () => calibrationParameters.lcSensitivity = parseFloat(lcSensitivityInput.value * 1000));
-            userCoefInput.addEventListener('change', () => calibrationParameters.userCoef = parseFloat(userCoefInput.value * 10000));
-            chartFilterInput.addEventListener('change', () => calibrationParameters.chartFilter = parseFloat(chartFilterInput.value));
-            dispFilterInput.addEventListener('change', () => calibrationParameters.dispFilter = parseFloat(dispFilterInput.value));
+            lcCapacityInput.addEventListener('change', () => calibrationParameters.lcCapacity = parseInt(lcCapacityInput.value));
+            lcSensitivityInput.addEventListener('change', () => calibrationParameters.lcSensitivity = parseFloat(lcSensitivityInput.value) * 1000);
+            userCoefInput.addEventListener('change', () => calibrationParameters.userCoef = parseFloat(userCoefInput.value) * 10000);
+            chartFilterInput.addEventListener('change', () => calibrationParameters.chartFilter = parseInt(chartFilterInput.value));
+            dispFilterInput.addEventListener('change', () => calibrationParameters.dispFilter = parseInt(dispFilterInput.value));
+            autoReturnInput.addEventListener('change', () => calibrationParameters.autoReturnFlag = autoReturnInput.checked ? 1 : 0);
             //----------------------------------------------------------------------------------------------  
             function showTab(panelId) {
                 tabButtons.forEach(button => button.classList.remove('active'));
@@ -1010,7 +1115,8 @@
             }
             //----------------------------------------------------------------------------------------------  
             function initSetting() {
-                autoReturnFlag = settingArr[0];
+                calibrationParameters.autoReturnFlag = settingArr[0];
+                autoReturnInput.checked = (calibrationParameters.autoReturnFlag === 0) ? false : true;
                 calibrationParameters.lcCapacity = settingArr[1];
                 lcCapacityInput.value = calibrationParameters.lcCapacity;
                 calibrationParameters.lcSensitivity = settingArr[2];
@@ -1143,7 +1249,7 @@
             //----------------------------------------------------------------------------------------------  
             async function sendSetting(address, value) {
                 if (!isWebBLEConnected || !txCharacteristic) {
-                    console.error("Not connected or TX Characteristic not available.");
+                    console.error("Not connected");
                     return;
                 }
                 const buffer = new ArrayBuffer(3);
@@ -1152,7 +1258,7 @@
                 view.setInt16(1, value, true);//speed value
                 try {
                     await txCharacteristic.writeValueWithoutResponse(buffer);
-                    console.log(`Sent speed command: ${speed}`);
+                    console.log(`Sent speed command: ${value}`);
                 } catch (error) {
                     console.error("Failed to send command:", error);
                 }
@@ -1163,9 +1269,8 @@
                     console.error("Not connected or TX Characteristic not available.");
                     return;
                 }
-                const buffer = new ArrayBuffer(1);
-                const view = new DataView(buffer);
-                view.setUint8(0, cmd);
+                const buffer = new Uint8Array(1);
+                buffer[0] = cmd;
                 try {
                     await txCharacteristic.writeValueWithoutResponse(buffer);
                     console.log(`Sent command: ${cmd}`);
@@ -1224,18 +1329,54 @@
 
                 try {
                     await txCharacteristic.writeValueWithoutResponse(buffer);
-                    console.log(`Sent command: ${cmd}`);
+                    console.log(`Sent command: Print`);
                 } catch (error) {
                     console.error("Failed to send command:", error);
                 }
             }
             //----------------------------------------------------------------------------------------------  
-            function saveSetting() {
-                if (calibrationParameters.lcCapacity != settingArr[1]) {
-                    sendSetting(1, calibrationParameters.lcCapacity);
+            async function saveSetting() {
+                if (!isWebBLEConnected || !txCharacteristic) {
+                    console.error("Not connected or TX Characteristic not available.");
+                    return;
                 }
-                if (calibrationParameters.lcSensitivity != settingArr[2]) {
-                    sendSetting(2, calibrationParameters.lcSensitivity);
+
+                const tempBuff = new Uint8Array(96);
+                const view = new DataView(tempBuff.buffer);
+                let idx = 0;
+                let arrIndex = 0;
+                //
+                if (calibrationParameters.autoReturnFlag !== settingArr[arrIndex]) {
+                    settingArr[arrIndex] = calibrationParameters.autoReturnFlag;
+                    tempBuff[idx] = arrIndex;
+                    view.setUint16(idx + 1, settingArr[arrIndex], true);
+                    idx += 3;
+                }
+                arrIndex++;
+                if (calibrationParameters.lcCapacity !== settingArr[arrIndex]) {
+                    settingArr[arrIndex] = calibrationParameters.lcCapacity;
+                    tempBuff[idx] = arrIndex;
+                    view.setUint16(idx + 1, settingArr[arrIndex], true);
+                    idx += 3;
+                }
+                arrIndex++;
+                if (calibrationParameters.lcSensitivity !== settingArr[arrIndex]) {
+                    settingArr[arrIndex] = calibrationParameters.lcSensitivity;
+                    tempBuff[idx] = arrIndex;
+                    view.setUint16(idx + 1, settingArr[arrIndex], true);
+                    idx += 3;
+                }
+                //
+                if (idx > 0) {
+                    tempBuff[idx] = 0x81;//beep
+                    idx++;
+                    const buff = tempBuff.subarray(0, idx);
+                    try {
+                        await txCharacteristic.writeValueWithoutResponse(buff);
+                        console.log(`Sent command: ${buff}`);
+                    } catch (error) {
+                        console.error("Failed to send command:", error);
+                    }
                 }
 
                 //sendCMD(0xFD);  //save setting
@@ -1259,10 +1400,10 @@
             //----------------------------------------------------------------------------------------------  
             function updateConnectButtonUI() {
                 if (isWebBLEConnected) {
-                    connectBleButton.textContent = 'Disconnect from WebBLE';
+                    connectBleButton.textContent = 'Disconnect';
                     connectBleButton.classList.add('disconnect');
                 } else {
-                    connectBleButton.textContent = 'Connect to WebBLE';
+                    connectBleButton.textContent = 'Connect';
                     connectBleButton.classList.remove('disconnect');
                 }
             }
@@ -1275,21 +1416,18 @@
                 if (isTestRunning) return;
                 isTestRunning = true;
                 console.log('Test Started');
-
-                loadDisplay.textContent = '0.0';
-                displacementDisplay.textContent = '0.000';
+                /*
                 fmaxValue.textContent = '0.0';
                 dmaxValue.textContent = '0.000';
                 fbreakValue.textContent = '0.0';
                 dbreakValue.textContent = '0.000';
                 stretchValue.textContent = '0.000';
-
+                */
                 if (tensileChart) {
                     tensileChart.data.labels = [];
                     tensileChart.data.datasets[0].data = [];
                     tensileChart.update();
                 }
-
                 sendSpeed(testParameters.testSpeed);
             });
             //----------------------------------------------------------------------------------------------  
@@ -1303,7 +1441,7 @@
                 isChartRunning = false;
                 console.log('Test Stopped');
 
-                if (autoReturnFlag) {
+                if (calibrationParameters.autoReturnFlag !== 0) {
                     sendSpeed(-32768);
                 } else {
                     sendSpeed(0);
@@ -1335,8 +1473,12 @@
             }
             //----------------------------------------------------------------------------------------------  
             stopButton.addEventListener('click', stopTest);
+            //----------------------------------------------------------------------------------------------  
             applyLoadCalbButton.addEventListener('click', () => {
                 applyLoadCalibration();
+            });
+            //----------------------------------------------------------------------------------------------  
+            saveLoadCalbButton.addEventListener('click', () => {
                 saveSetting();
             });
             //----------------------------------------------------------------------------------------------  
@@ -1379,6 +1521,15 @@
                 if (!isWebBLEConnected) return;
                 sendSpeed(0);
             });
+            //----------------------------------------------------------------------------------------------   
+            function getSelectedTestTypeText() {
+                const selectedOption = testTypeSelect.options[testParameters.testType];
+                // Return the text content of the selected option
+                if (selectedOption) {
+                    return selectedOption.textContent;
+                }
+                return '';
+            }
             //----------------------------------------------------------------------------------------------        
             reportButton.addEventListener('click', () => {
                 reportDateTime.textContent = new Date().toLocaleString();
@@ -1386,7 +1537,7 @@
                 reportSampleWidth.textContent = `${testParameters.sampleWidth} mm`;
                 reportSampleThickness.textContent = `${testParameters.sampleThickness} mm`;
                 reportTestSpeed.textContent = `${testParameters.testSpeed} mm/min`;
-                reportTestTypeParam.textContent = testParameters.testType;
+                reportTestTypeParam.textContent = getSelectedTestTypeText();
 
                 reportFmaxValue.textContent = `${fmaxValue.textContent} N`;
                 reportDmaxValue.textContent = `${dmaxValue.textContent} mm`;
